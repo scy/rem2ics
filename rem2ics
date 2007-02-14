@@ -193,6 +193,10 @@ Collapse repeating events. Fold output lines.
 
 POD. Command line options. First public release.
 
+=item version 0.91 2007-02-14
+
+Bug fix, error message for non-recurring events
+
 =back
 
 =head1 SEE ALSO
@@ -225,7 +229,7 @@ use Getopt::Long;
 use Pod::Usage;
 
 my $app_name = "rem2ics";
-my $app_version = "0.9";
+my $app_version = "0.91";
 
 # process the command line
 my %options;
@@ -402,6 +406,7 @@ foreach my $k (keys %grovel) {
 }
 
 foreach my $k (keys %grovel) {
+    next if ((scalar @{$grovel{$k}}) <= 1);
     my $v = ${$grovel{$k}}[0];  # grab the head of each list
     if (${$v->{sf}}[4] eq "*") {  # no time was given
 	# the default value type for an RDATE is DATE-TIME,
