@@ -2,7 +2,10 @@
 
 # rem2ics -- convert the output of "remind -s" into RFC2445 iCalendar format.
 
-# Copyright 2007 (c) by Mark Atwood <me@mark.atwood.name>
+# Copyright 2007,2008
+#  Mark Atwood <me@mark.atwood.name>
+#  Paul Hinze <paul dot t dot hinze at gmail dot com>
+#  Michael Schultz <mjschultz at gmail dot com>
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -197,6 +200,15 @@ POD. Command line options. First public release.
 
 Bug fix, error message for non-recurring events
 
+=item version 0.92 2008-01-28
+
+Bug fix, 
+ rem2ics 0.91 chokes on timed reminders with
+ duration using `remind -s` as it functions in remind-03.01.03.
+ Remind 3.01 changed how the -s data is formated for events that have a duration
+ Patch by Paul Hinze E<lt>paul dot t dot hinze at gmail dot comE<gt>
+  and Michael Schultz E<lt>mjschultz at gmail dot comE<gt>
+
 =back
 
 =head1 SEE ALSO
@@ -315,8 +327,14 @@ foreach (<STDIN>) {
     if ($sf[4] ne "*") {  # a time was given
 	# When an event has a time, remind -s "helpfully" also
 	# puts it as text at the start of the text portion.
-	$sf[5] =~ m/^\d{1,2}\:\d{2}(a|p)m (.*)$/;
-	$sf[5] = $2;
+	# This takes the following form:
+	#   ##:##[a|p]m <rest of MSG>
+	# or, if the event has a duration:
+	#   ##:##[a|p]m-##:##[a|p]m <rest of MSG>
+	# Rather than a nasty regex, just splitting at the 
+	# first space does the trick.
+	my($extra_time, $textmsg) = split(' ', $sf[5], 2);
+	$sf[5] = $textmsg;
     }
 
     $v->{sf} = \@sf;
