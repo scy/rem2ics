@@ -241,7 +241,7 @@ use Getopt::Long;
 use Pod::Usage;
 
 my $app_name = "rem2ics";
-my $app_version = "0.91";
+my $app_version = "0.92";
 
 # process the command line
 my %options;
