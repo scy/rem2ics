@@ -2,7 +2,7 @@
 
 # rem2ics -- convert the output of "remind -s" into RFC2445 iCalendar format.
 
-# Copyright 2007,2008
+# Copyright 2007,2008,2009
 #  Mark Atwood <me@mark.atwood.name>
 #  Paul Hinze <paul dot t dot hinze at gmail dot com>
 #  Michael Schultz <mjschultz at gmail dot com>
@@ -53,7 +53,7 @@ Do not attempt to detect and fold together recurring events.
 
 =item B<-usetag>
 
-Use the TAG clause in reminders for UIDs instead of synthesizing by ourself.
+Generate UIDs using remind TAG clauses.
 
 =back
 
@@ -65,7 +65,12 @@ Output is to standard output.
 
   remind -s360 -irem2ics=1 ~/.reminders 1 Jan 1991 | TZ=PST8PDT rem2ics -do >reminders.ics
 
-This tells B<remind> to use ~/.reminders, and to process the entire range of dates it can handle (from Jan 1 1991 to Dec 31 2020), and to define a variable named C<rem2ics>, which can be used in C<IF !defined("rem2ics")> / C<ENDIF> pairs.  B<rem2ics> will use a timezone of PST8PDT, and will fold events that have the same name and duration into a single iCalendar VEVENT object.
+This tells B<remind> to use ~/.reminders, and to process the entire
+range of dates it can handle (from Jan 1 1991 to Dec 31 2020), and to
+define a variable named C<rem2ics>, which can be used in
+C<IF !defined("rem2ics")> / C<ENDIF> pairs.
+B<rem2ics> will use a timezone of PST8PDT, and will fold events that
+have the same name and duration into a single iCalendar VEVENT object.
 
 =head1 NOTES
 
@@ -169,7 +174,7 @@ L<iCal::Parser>, or C<libical>.
 
 =head2 Previous implementation
 
-There is an working quick & dirty rem2ics written in awk
+There is a working quick & dirty rem2ics written in awk
 by Anthony J. Chivetta E<lt>achivetta@gmail.comE<gt>.
 
 But it has the following problems: it doesn't escape the text, it
@@ -180,12 +185,9 @@ fold long lines.  This is a replacement for that script.
 =head1 TODO
 
  If TZ not set, grab out of system config somewhere
- Better help (DONE(?))
- Write POD (DONE)
  Detect recurring events.
-  Collapse them into one VEVENT with an RDATE (DONE)
   If I'm REALLY smart, derive RRULE
- Handle characters not in US-ASCII. Latin1? UTC8?
+ Handle characters not in US-ASCII. Latin1? UTF8?
 
 =head1 VERSION HISTORY
 
@@ -222,8 +224,8 @@ Bug fix,
 
 =item version 0.93 2009-06-25
 
-Add B<-usetag> option to allow for UIDs to stay the same across
-multiple runs.
+Add B<-usetag> option to allow for UIDs to stay the same across multiple runs
+ by using the remind TAG clause.
  Patch by Tim Weber E<lt>scy at scytale dot nameE<gt>
 
 =back
@@ -242,7 +244,7 @@ L<remind(1)>
 
 =head1 AUTHOR
 
-Copyright 2007 (c) by Mark Atwood E<lt>me+rem2ics@mark.atwood.nameE<gt>. L<http://mark.atwood.name/>.
+Copyright 2007,2008,2009 by Mark Atwood E<lt>me+rem2ics@mark.atwood.nameE<gt>. L<http://mark.atwood.name/>.
 
 Please report bugs (with patches, if possible).
 
@@ -258,7 +260,7 @@ use Getopt::Long;
 use Pod::Usage;
 
 my $app_name = "rem2ics";
-my $app_version = "0.92";
+my $app_version = "0.93";
 
 # process the command line
 my %options;
