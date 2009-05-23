@@ -32,7 +32,7 @@ rem2ics - convert the output of "remind -s" into RFC2445 iCalendar format.
 
 =head1 SYNOPSIS
 
-TZ=I<timezone> B<rem2ics> [B<-man>] [B<-do>] [B<-norecur>] E<lt>input E<gt>output
+TZ=I<timezone> B<rem2ics> [B<-man>] [B<-do>] [B<-norecur>] [B<-usetag>] E<lt>input E<gt>output
 
 =head1 OPTIONS AND ARGUMENTS
 
@@ -51,6 +51,10 @@ and usage example, and then exit.
 
 Do not attempt to detect and fold together recurring events.
 
+=item B<-usetag>
+
+Use the TAG clause in reminders for UIDs instead of synthesizing by ourself.
+
 =back
 
 Input is from standard input
@@ -59,7 +63,7 @@ Output is to standard output.
 
 =head1 USAGE
 
-  remind -s360 -irem2ics=1 ~/.reminders 1 Jan 1991 | TZ=PST8PDT rem2ics -do >reminders.ics 
+  remind -s360 -irem2ics=1 ~/.reminders 1 Jan 1991 | TZ=PST8PDT rem2ics -do >reminders.ics
 
 This tells B<remind> to use ~/.reminders, and to process the entire range of dates it can handle (from Jan 1 1991 to Dec 31 2020), and to define a variable named C<rem2ics>, which can be used in C<IF !defined("rem2ics")> / C<ENDIF> pairs.  B<rem2ics> will use a timezone of PST8PDT, and will fold events that have the same name and duration into a single iCalendar VEVENT object.
 
@@ -141,10 +145,17 @@ B<rem2ics> does not generate C<DESCRIPTION> or C<LOCATION>.  One
 would have to heuristically parse them out of the text, and everyone
 uses a idiosyncratic way of putting things in B<remind>.
 
-B<rem2ics> does generate C<UID> properties for each VEVENT, but the
-UIDs are different (and unique) for each run of B<rem2ics>.  If you
-run rem2ics twice and import the two resulting ICS streams into your
-new scheduling program, your appointments will appear twice.
+If the B<-usetag> option is not used or no C<TAG> is set for a
+reminder, B<rem2ics> will synthesize C<UID> properties for each
+VEVENT, but the UIDs will be different (and unique) for each run of
+B<rem2ics>.  If you run rem2ics twice and import the two resulting ICS
+streams into your new scheduling program, your appointments will
+appear twice.  If, however, you have set C<TAG> clauses in your
+reminders and activated B<-usetag>, these will be used.  The same
+applies for tags synthesized by B<remind>'s B<-y> option.  Hence, it
+is more useful to use the B<-y> option than to let B<rem2ics>
+synthesize UIDs, because the UIDs will stay the same across multiple
+runs.
 
 =head2 Other iCalendar Perl objects
 
@@ -209,6 +220,12 @@ Bug fix,
  Patch by Paul Hinze E<lt>paul dot t dot hinze at gmail dot comE<gt>
   and Michael Schultz E<lt>mjschultz at gmail dot comE<gt>
 
+=item version 0.93 2009-06-25
+
+Add B<-usetag> option to allow for UIDs to stay the same across
+multiple runs.
+ Patch by Tim Weber E<lt>scy at scytale dot nameE<gt>
+
 =back
 
 =head1 SEE ALSO
@@ -245,7 +262,7 @@ my $app_version = "0.92";
 
 # process the command line
 my %options;
-GetOptions(\%options, qw(man do norecurr))  ||  pod2usage(2);
+GetOptions(\%options, qw(man do norecurr usetag))  ||  pod2usage(2);
 pod2usage(-verbose => 2)  if ($options{man});
 
 unless ($options{do}) {
@@ -486,9 +503,14 @@ foreach $v (@events) {
     next if ($v->{is_recurrance} and (not $v->{recurlist}));
 
     print "BEGIN:VEVENT\015\012";
-    # fake up a UID from start time, process id, input line count, & hostname
-    print &lineify(sprintf("UID:rem2ics.%x.%x.%x@%s",
-			   $^T, $$, $v->{cnt}, $ical_uid_hostname));
+    my $tag = ${$v->{sf}}[2];
+    # if $tag is not set, fake up a UID from start time, process id & input line count
+    if ($tag eq "*" || !$options{usetag}) {
+        $tag = sprintf("%x.%x.%x", $^T, $$, $v->{cnt});
+    }
+    # add rem2ics and hostname to UID
+    print &lineify(sprintf("UID:rem2ics.%s@%s",
+			   $tag, $ical_uid_hostname));
     print &lineify("SUMMARY:" . &quotify(${$v->{sf}}[5]));
     print &lineify($v->{i_dtstart});
     print &lineify("DURATION:" . $v->{i_duration})
