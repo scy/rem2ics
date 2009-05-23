@@ -1,5 +1,5 @@
 Name:           rem2ics
-Version:        0.92
+Version:        0.93
 Release:        1%{?dist}
 Summary:        Converts the output of "remind -s" into RFC2445 iCalendar format
 
