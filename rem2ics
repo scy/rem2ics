@@ -470,7 +470,7 @@ foreach $v (@events) {
     next if ($v->{is_recurrance} and (not $v->{recurlist}));
 
     if (${$v->{sf}}[4] eq "*") {  # no time was given
-	$v->{i_dtstart} = sprintf("DTSTART:%s", $v->{dts});
+	$v->{i_dtstart} = sprintf("DTSTART;VALUE=DATE:%s", $v->{dts});
     } else {
 	if (defined($ical_tzid)) {
 	    if ($ical_tzid eq '') {  # tz is defined but empty, so in GMT
