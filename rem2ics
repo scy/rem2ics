@@ -301,7 +301,7 @@ if (exists $ENV{'TZ'}) {
 my ($ical_dtstamp);
 {
     my @gt = gmtime($^T);
-    $ical_dtstamp = sprintf("%04d%02d%02dZ%02d%02d%02dZ",
+    $ical_dtstamp = sprintf("%04d%02d%02dT%02d%02d%02dZ",
 			    1900+$gt[5], $gt[4]+1, $gt[3],
 			    $gt[2], $gt[1], $gt[0]);
 }
@@ -470,7 +470,7 @@ foreach $v (@events) {
     next if ($v->{is_recurrance} and (not $v->{recurlist}));
 
     if (${$v->{sf}}[4] eq "*") {  # no time was given
-	$v->{i_dtstart} = sprintf("DTSTART:%s", $v->{dts});
+	$v->{i_dtstart} = sprintf("DTSTART;VALUE=DATE:%s", $v->{dts});
     } else {
 	if (defined($ical_tzid)) {
 	    if ($ical_tzid eq '') {  # tz is defined but empty, so in GMT
@@ -490,6 +490,10 @@ foreach $v (@events) {
 	# crossing hours, days, months, year, etc.  Instead we
 	# will let the iCalendar consuming application worry about it.
 	$v->{i_duration} = sprintf("PT%dM", ${$v->{sf}}[3]);
+    } else {
+        if (${$v->{sf}}[4] ne "*") {  # no time was given
+            $v->{i_duration} = sprintf("PT0M");
+        }
     }
 }
 
