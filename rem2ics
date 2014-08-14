@@ -301,7 +301,7 @@ if (exists $ENV{'TZ'}) {
 my ($ical_dtstamp);
 {
     my @gt = gmtime($^T);
-    $ical_dtstamp = sprintf("%04d%02d%02dZ%02d%02d%02dZ",
+    $ical_dtstamp = sprintf("%04d%02d%02dT%02d%02d%02dZ",
 			    1900+$gt[5], $gt[4]+1, $gt[3],
 			    $gt[2], $gt[1], $gt[0]);
 }
