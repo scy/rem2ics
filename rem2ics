@@ -490,6 +490,10 @@ foreach $v (@events) {
 	# crossing hours, days, months, year, etc.  Instead we
 	# will let the iCalendar consuming application worry about it.
 	$v->{i_duration} = sprintf("PT%dM", ${$v->{sf}}[3]);
+    } else {
+        if (${$v->{sf}}[4] ne "*") {  # no time was given
+            $v->{i_duration} = sprintf("PT0M");
+        }
     }
 }
 
